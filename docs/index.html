@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHIMORA-6600X — Veteran Shooter & Config Customizer</title>
+<meta name="description" content="Personal portfolio of SHIMORA-6600X — Veteran Shooter & Config Customizer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+
+<!-- Early theme & language restore (no FOUC) -->
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      var l = localStorage.getItem('lang');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      if (l === 'ar') {
+        document.documentElement.lang = 'ar';
+        document.documentElement.dir = 'rtl';
+      }
+    } catch (e) {}
+  })();
+</script>
+
+<style>
+/* ============================================================
+   THEME TOKENS — Catppuccin Mocha (dark) & Latte (light)
+   ============================================================ */
+:root, [data-theme="dark"] {
+  --bg:           #000000;
+  --bg-elevated:  #0a0a0f;
+  --bg-card:      #11111b;
+  --bg-card-2:    #1e1e2e;
+  --surface-0:    #313244;
+  --surface-1:    #45475a;
+  --surface-2:    #585b70;
+  --text:         #cdd6f4;
+  --subtext-1:    #bac2de;
+  --subtext-0:    #a6adc8;
+  --overlay:      #7f849c;
+  --mauve:        #cba6f7;
+  --lavender:     #b4befe;
+  --blue:         #89b4fa;
+  --sapphire:     #74c7ec;
+  --teal:         #94e2d5;
+  --pink:         #f5c2e7;
+  --peach:        #fab387;
+  --green:        #a6e3a1;
+  --red:          #f38ba8;
+  --glow-opacity: 0.35;
+  --nav-bg:       rgba(10, 10, 15, 0.75);
+  --card-shadow:  0 12px 40px rgba(0, 0, 0, 0.6);
+  --glow-shadow:  0 0 30px rgba(203, 166, 247, 0.15);
+}
+
+[data-theme="light"] {
+  --bg:           #eff1f5;
+  --bg-elevated:  #e6e9ef;
+  --bg-card:      #ffffff;
+  --bg-card-2:    #e6e9ef;
+  --surface-0:    #ccd0da;
+  --surface-1:    #bcc0cc;
+  --surface-2:    #acb0be;
+  --text:         #4c4f69;
+  --subtext-1:    #5c5f77;
+  --subtext-0:    #6c6f85;
+  --overlay:      #8c8fa1;
+  --mauve:        #8839ef;
+  --lavender:     #7287fd;
+  --blue:         #1e66f5;
+  --sapphire:     #209fb5;
+  --teal:         #179299;
+  --pink:         #ea76cb;
+  --peach:        #fe640b;
+  --green:        #40a02b;
+  --red:          #d20f39;
+  --glow-opacity: 0.12;
+  --nav-bg:       rgba(239, 241, 245, 0.75);
+  --card-shadow:  0 12px 40px rgba(76, 79, 105, 0.12);
+  --glow-shadow:  0 0 30px rgba(136, 57, 239, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* خلفية الأنيميشن (Canvas) */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+::selection { background: var(--mauve); color: var(--bg); }
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-elevated); }
+::-webkit-scrollbar-thumb { background: var(--surface-1); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--mauve); }
+
+/* ============================================================
+   SCROLL PROGRESS
+   ============================================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--mauve), var(--blue), var(--lavender));
+  z-index: 1000;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px var(--mauve);
+}
+
+/* ============================================================
+   AMBIENT GLOWS
+   ============================================================ */
+.glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: var(--glow-opacity);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+}
+.glow-1 {
+  width: 420px; height: 420px;
+  background: var(--mauve);
+  top: -120px; inset-inline-end: -100px;
+  animation: float 12s ease-in-out infinite;
+}
+.glow-2 {
+  width: 380px; height: 380px;
+  background: var(--blue);
+  bottom: -100px; inset-inline-start: -100px;
+  animation: float 15s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(30px, -30px); }
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--surface-0);
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 14px;
+  gap: 16px;
+}
+.nav-logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.logo-dot { color: var(--mauve); text-shadow: 0 0 15px var(--mauve); }
+.nav-links {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.nav-links a {
+  color: var(--subtext-0);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.25s;
+}
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  inset-inline-start: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--mauve), var(--blue));
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.lang-btn, .theme-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--surface-0);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lang-btn:hover, .theme-btn:hover {
+  border-color: var(--mauve);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(203, 166, 247, 0.2);
+}
+.lang-opt { opacity: 0.5; transition: opacity 0.25s, color 0.25s; }
+.lang-opt.active { opacity: 1; color: var(--mauve); }
+.lang-sep { color: var(--overlay); font-weight: 400; }
+.theme-btn { font-size: 1.05rem; padding: 6px 12px; }
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  padding: 100px 20px 80px;
+  text-align: center;
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+}
+.hero-inner { width: 100%; }
+
+.avatar-img {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface-0);
+  box-shadow: 0 0 50px rgba(203, 166, 247, 0.5);
+  animation: pulse 3s ease-in-out infinite, popIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(203, 166, 247, 0.4); }
+  50%      { box-shadow: 0 0 70px rgba(203, 166, 247, 0.75); }
+}
+@keyframes popIn {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.greeting {
+  color: var(--subtext-0);
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+
+.hero-name {
+  font-size: 3.2rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--mauve), var(--lavender), var(--blue), var(--mauve));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease infinite, fadeUp 0.8s ease 0.3s both;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.typing-wrap {
+  font-size: 1.15rem;
+  color: var(--subtext-1);
+  min-height: 2em;
+  margin-bottom: 24px;
+  animation: fadeUp 0.8s ease 0.4s both;
+}
+.typing-prefix { color: var(--subtext-0); margin-inline-end: 6px; }
+.typing-text {
+  color: var(--mauve);
+  font-weight: 700;
+}
+.typing-cursor {
+  color: var(--mauve);
+  font-weight: 300;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.hero-desc {
+  max-width: 620px;
+  margin: 0 auto 32px;
+  color: var(--subtext-0);
+  font-size: 1.02rem;
+  animation: fadeUp 0.8s ease 0.5s both;
+}
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s ease 0.6s both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 26px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--bg);
+  background: linear-gradient(135deg, var(--mauve), var(--lavender));
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(203, 166, 247, 0.4);
+  background: linear-gradient(135deg, var(--lavender), var(--blue));
+}
+.btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--surface-0);
+}
+.btn.secondary:hover {
+  border-color: var(--blue);
+  box-shadow: 0 6px 20px rgba(137, 180, 250, 0.25);
+  background: transparent;
+  transform: translateY(-3px);
+}
+
+.scroll-hint {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--overlay);
+  font-size: 0.85rem;
+  text-decoration: none;
+  animation: fadeUp 0.8s ease 0.8s both;
+}
+.scroll-arrow {
+  font-size: 1.2rem;
+  animation: bounce 2s ease infinite;
+  color: var(--mauve);
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+section {
+  padding: 70px 0;
+  scroll-margin-top: 80px;
+}
+
+section h2 {
+  font-size: 1.7rem;
+  margin-bottom: 32px;
+  color: var(--text);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hash {
+  color: var(--mauve);
+  font-family: "Fira Code", Consolas, monospace;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(203, 166, 247, 0.5);
+}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+.about-content p {
+  color: var(--subtext-1);
+  margin-bottom: 18px;
+  font-size: 1.02rem;
+}
+.about-content p:last-child { margin-bottom: 0; }
+.about-content strong { color: var(--lavender); }
+
+.about-facts {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.fact-label {
+  color: var(--overlay);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.fact-value { color: var(--text); font-weight: 600; }
+.fact-value.accent { color: var(--mauve); }
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.stat {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 14px;
+  padding: 26px 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: "";
+  position: absolute;
+  top: 0; inset-inline-start: 0; inset-inline-end: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mauve), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat:hover {
+  transform: translateY(-5px);
+  border-color: var(--surface-2);
+  box-shadow: var(--card-shadow), var(--glow-shadow);
+}
+.stat:hover::before { opacity: 1; }
+.stat-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--mauve);
+  line-height: 1.2;
+}
+.stat-label {
+  color: var(--subtext-0);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+/* ============================================================
+   SKILLS
+   ============================================================ */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.skill-card {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 14px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+.skill-card:hover {
+  border-color: var(--surface-2);
+  box-shadow: var(--card-shadow);
+}
+.skill-card h3 {
+  font-size: 1.1rem;
+  color: var(--lavender);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skill-card h3::before {
+  content: "";
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(180deg, var(--mauve), var(--blue));
+  border-radius: 2px;
+}
+.skill { margin-bottom: 16px; }
+.skill:last-child { margin-bottom: 0; }
+.skill-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--subtext-1);
+  margin-bottom: 6px;
+}
+.skill-pct { color: var(--overlay); font-weight: 600; }
+.skill-bar {
+  height: 6px;
+  background: var(--surface-0);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.skill-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--mauve), var(--blue));
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(203, 166, 247, 0.4);
+}
+
+/* ============================================================
+   PROJECTS
+   ============================================================ */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 22px;
+}
+.project-card {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.project-card::before {
+  content: "";
+  position: absolute;
+  top: 0; inset-inline-start: 0; inset-inline-end: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mauve), var(--blue), transparent);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--surface-2);
+  box-shadow: var(--card-shadow), var(--glow-shadow);
+}
+.project-card:hover::before { opacity: 1; }
+
+.project-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.project-icon {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(203, 166, 247, 0.4));
+}
+.project-card h3 {
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.project-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bg);
+  background: linear-gradient(135deg, var(--peach), var(--mauve));
+  padding: 2px 8px;
+  border-radius: 5px;
+  margin-top: 4px;
+}
+.project-card p {
+  color: var(--subtext-0);
+  margin-bottom: 20px;
+  font-size: 0.96rem;
+  flex: 1;
+}
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.project-tags span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--blue);
+  background: rgba(137, 180, 250, 0.1);
+  border: 1px solid rgba(137, 180, 250, 0.25);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+.project-card .btn { align-self: flex-start; }
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+.timeline {
+  position: relative;
+  padding-inline-start: 34px;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  inset-inline-start: 10px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--mauve), var(--blue), transparent);
+  opacity: 0.5;
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 34px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute;
+  inset-inline-start: -30px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--mauve);
+  box-shadow: 0 0 15px var(--mauve);
+  transition: transform 0.3s;
+}
+.timeline-item:hover .timeline-dot { transform: scale(1.3); }
+.timeline-content {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 12px;
+  padding: 20px 22px;
+  transition: all 0.3s;
+}
+.timeline-content:hover {
+  border-color: var(--surface-2);
+  transform: translateX(-4px);
+}
+[dir="rtl"] .timeline-content:hover { transform: translateX(4px); }
+.timeline-year {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--bg);
+  background: linear-gradient(135deg, var(--mauve), var(--blue));
+  padding: 2px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.timeline-content h3 {
+  color: var(--text);
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+.timeline-content p {
+  color: var(--subtext-0);
+  font-size: 0.92rem;
+}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact-box {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--surface-0);
+  border-radius: 16px;
+  padding: 36px;
+  text-align: center;
+}
+.contact-box p {
+  color: var(--subtext-0);
+  margin-bottom: 26px;
+  font-size: 1.02rem;
+  max-width: 560px;
+  margin-inline: auto;
+}
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--surface-0);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+.contact-link:hover {
+  border-color: var(--mauve);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(203, 166, 247, 0.25);
+}
+.contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  margin-top: 40px;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--overlay);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--surface-0);
+  background: var(--bg-elevated);
+  transition: background 0.4s ease;
+}
+
+/* ============================================================
+   REVEAL ANIMATIONS
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 820px) {
+  .nav-links { display: none; }
+  .about-grid { grid-template-columns: 1fr; }
+  .skills-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .hero-name { font-size: 2.2rem; }
+  .hero { padding: 70px 20px 50px; min-height: auto; }
+  .avatar-img { width: 110px; height: 110px; }
+  section h2 { font-size: 1.35rem; }
+  section { padding: 50px 0; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat { padding: 20px 12px; }
+  .stat-num { font-size: 1.7rem; }
+  .typing-wrap { font-size: 1rem; }
+  .contact-box { padding: 26px 20px; }
+  .glow { opacity: calc(var(--glow-opacity) * 0.7); }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- خلفية الأنيميشن -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+  <div class="nav-inner container">
+    <a href="#top" class="nav-logo">S<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="#about" data-i18n="nav.about">About</a>
+      <a href="#skills" data-i18n="nav.skills">Skills</a>
+      <a href="#projects" data-i18n="nav.projects">Projects</a>
+      <a href="#timeline" data-i18n="nav.timeline">Timeline</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+    </div>
+    <div class="nav-controls">
+      <button class="lang-btn" id="langToggle" aria-label="Switch language">
+        <span class="lang-opt active" data-lang="en">EN</span>
+        <span class="lang-sep">/</span>
+        <span class="lang-opt" data-lang="ar">ع</span>
+      </button>
+      <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="top" class="hero">
+  <div class="container hero-inner">
+    <!-- الصورة الشخصية -->
+    <img src="https://avatars.githubusercontent.com/u/238486445?v=4" alt="SHIMORA-6600X" class="avatar-img">
+    
+    <p class="greeting" data-i18n="hero.greeting">Hi there, I'm</p>
+    <h1 class="hero-name">SHIMORA-6600X</h1>
+    <div class="typing-wrap">
+      <span class="typing-prefix" data-i18n="hero.im">I'm a</span>
+      <span class="typing-text" id="typingText"></span><span class="typing-cursor">|</span>
+    </div>
+    <p class="hero-desc" data-i18n="hero.desc">
+      Veteran shooter player & config customizer. I build optimized setups for open source tools.
+    </p>
+    <div class="hero-buttons">
+      <a href="https://github.com/SHIMORA-6600X" target="_blank" rel="noopener" class="btn" data-i18n="hero.btnGithub">GitHub Profile</a>
+      <a href="https://github.com/SHIMORA-6600X/ZenFox" target="_blank" rel="noopener" class="btn secondary" data-i18n="hero.btnZenfox">Explore ZenFox</a>
+    </div>
+    <a href="#about" class="scroll-hint">
+      <span data-i18n="hero.scroll">Scroll down</span>
+      <span class="scroll-arrow">↓</span>
+    </a>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ ABOUT ============ -->
+<section id="about" class="container">
+  <h2 class="reveal"><span class="hash">#</span> <span data-i18n="about.title">About Me</span></h2>
+  <div class="about-grid">
+    <div class="about-content">
+      <p class="reveal" data-i18n="about.p1">
+        I am primarily a veteran shooter player, not a professional developer. However, I have a strong passion for customizing and building config files for famous open-source projects like Firefox.
+      </p>
+      <p class="reveal" data-i18n="about.p2">
+        I use my deep gaming experience and technical knowledge (JavaScript, CSS, etc.) to create highly optimized configurations and setups.
+      </p>
+      <p class="reveal" data-i18n="about.p3">
+        I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, GitHub, and many others.
+      </p>
+    </div>
+    <div class="about-facts reveal">
+      <div class="fact">
+        <div class="fact-label" data-i18n="about.locLabel">Location</div>
+        <div class="fact-value" data-i18n="about.locValue">Egypt</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label" data-i18n="about.focusLabel">Focus</div>
+        <div class="fact-value" data-i18n="about.focusValue">Gaming & Config Customization</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label" data-i18n="about.currentLabel">Current Project</div>
+        <div class="fact-value accent">ZenFox</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label" data-i18n="about.statusLabel">Status</div>
+        <div class="fact-value" data-i18n="about.statusValue">Open to collaborate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section id="stats" class="container">
+  <div class="stats-grid">
+    <div class="stat reveal">
+      <div class="stat-num"><span class="counter" data-target="5">0</span>+</div>
+      <div class="stat-label" data-i18n="stats.yearsShooter">Years in Shooters</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-num"><span class="counter" data-target="10">0</span>+</div>
+      <div class="stat-label" data-i18n="stats.configs">Configs Built</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-num"><span class="counter" data-target="500">0</span>+</div>
+      <div class="stat-label" data-i18n="stats.commits">Commits</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat-num"><span class="counter" data-target="15">0</span>+</div>
+      <div class="stat-label" data-i18n="stats.tools">Tools Used</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SKILLS ============ -->
+<section id="skills" class="container">
+  <h2 class="reveal"><span class="hash">#</span> <span data-i18n="skills.title">Skills</span></h2>
+  <div class="skills-grid">
+
+    <div class="skill-card reveal">
+      <h3 data-i18n="skills.gaming">Gaming & Shooters</h3>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.aim">Aim & Reflexes</span><span class="skill-pct">96%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="96"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.gamesense">Game Sense</span><span class="skill-pct">95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="95"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.tactics">Tactics & Strategy</span><span class="skill-pct">90%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="90"></div></div>
+      </div>
+    </div>
+
+    <div class="skill-card reveal">
+      <h3 data-i18n="skills.config">Config Customization</h3>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.js">JavaScript</span><span class="skill-pct">85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="85"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.css">CSS</span><span class="skill-pct">85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="85"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.firefox">Firefox Configs</span><span class="skill-pct">90%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="90"></div></div>
+      </div>
+    </div>
+
+    <div class="skill-card reveal">
+      <h3 data-i18n="skills.tools">Tools & Tech</h3>
+      <div class="skill">
+        <div class="skill-head"><span>Notepad++</span><span class="skill-pct">95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="95"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span>Git &amp; GitHub</span><span class="skill-pct">80%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="80"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.osTools">Open Source Tools</span><span class="skill-pct">85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="85"></div></div>
+      </div>
+    </div>
+
+    <div class="skill-card reveal">
+      <h3 data-i18n="skills.practices">Practices</h3>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.opensource">Open Source Knowledge</span><span class="skill-pct">90%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="90"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.learning">Continuous Learning</span><span class="skill-pct">95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="95"></div></div>
+      </div>
+      <div class="skill">
+        <div class="skill-head"><span data-i18n="skills.problem">Problem Solving</span><span class="skill-pct">85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" data-level="85"></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects" class="container">
+  <h2 class="reveal"><span class="hash">#</span> <span data-i18n="projects.title">Projects</span></h2>
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-icon">🦊</span>
+        <div>
+          <h3>ZenFox</h3>
+          <span class="project-badge" data-i18n="projects.featured">Featured</span>
+        </div>
+      </div>
+      <p data-i18n="projects.zenfox.desc">
+        A simple project I built to learn and gain technical experience in free software. Explore the code on GitHub.
+      </p>
+      <div class="project-tags">
+        <span>Open Source</span>
+        <span>GitHub</span>
+        <span>Configs</span>
+      </div>
+      <a href="https://github.com/SHIMORA-6600X/ZenFox" target="_blank" rel="noopener" class="btn" data-i18n="projects.view">View on GitHub →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-icon">🚀</span>
+        <div>
+          <h3 data-i18n="projects.more.title">More on GitHub</h3>
+        </div>
+      </div>
+      <p data-i18n="projects.more.desc">
+        I'm always exploring new things. Check out my GitHub profile to see all my repositories and ongoing experiments.
+      </p>
+      <div class="project-tags">
+        <span>Repositories</span>
+        <span>Experiments</span>
+      </div>
+      <a href="https://github.com/SHIMORA-6600X" target="_blank" rel="noopener" class="btn" data-i18n="projects.browse">Browse GitHub →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section id="timeline" class="container">
+  <h2 class="reveal"><span class="hash">#</span> <span data-i18n="timeline.title">Timeline</span></h2>
+  <div class="timeline">
+
+    <!-- 2026 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <span class="timeline-year" data-i18n="timeline.t1.year">2026</span>
+        <h3 data-i18n="timeline.t1.title">Shooter Veteran & Tech Experience</h3>
+        <p data-i18n="timeline.t1.desc">Became a veteran in the shooter scene, learned a lot, built simple projects like ZenFox, and gained technical experience in free software and shooters.</p>
+      </div>
+    </div>
+
+    <!-- 2025 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <span class="timeline-year" data-i18n="timeline.t2.year">2025</span>
+        <h3 data-i18n="timeline.t2.title">Exploring Open Source</h3>
+        <p data-i18n="timeline.t2.desc">Started learning about open source, began using open source apps and tools.</p>
+      </div>
+    </div>
+
+    <!-- 2024 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <span class="timeline-year" data-i18n="timeline.t3.year">2024</span>
+        <h3 data-i18n="timeline.t3.title">Became a Pro</h3>
+        <p data-i18n="timeline.t3.desc">Mastered shooters and became a professional player.</p>
+      </div>
+    </div>
+
+    <!-- 2023 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <span class="timeline-year" data-i18n="timeline.t4.year">2023</span>
+        <h3 data-i18n="timeline.t4.title">Path to Professionalism</h3>
+        <p data-i18n="timeline.t4.desc">The beginning of my path to professionalism in the shooter world.</p>
+      </div>
+    </div>
+
+    <!-- 2022 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <span class="timeline-year" data-i18n="timeline.t5.year">2022</span>
+        <h3 data-i18n="timeline.t5.title">Started Playing Shooters</h3>
+        <p data-i18n="timeline.t5.desc">Started playing shooter games and diving into the scene.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact" class="container">
+  <h2 class="reveal"><span class="hash">#</span> <span data-i18n="contact.title">Contact</span></h2>
+  <div class="contact-box reveal">
+    <p data-i18n="contact.desc">
+      Have an idea, a question, or just want to say hi? Reach out to me on GitHub or Telegram.
+    </p>
+    <div class="contact-links">
+      <a href="https://github.com/SHIMORA-6600X" target="_blank" rel="noopener" class="contact-link">
+        <span class="contact-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </span>
+        <span>GitHub</span>
+      </a>
+      <a href="https://t.me/+e5A5bjJmX-43MmRk" target="_blank" rel="noopener" class="contact-link">
+        <span class="contact-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+        </span>
+        <span>Telegram</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p data-i18n="footer.text">© 2026 SHIMORA-6600X. Built with 💜</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   TRANSLATIONS (Egyptian Arabic Added)
+   ============================================================ */
+const translations = {
+  en: {
+    title: "SHIMORA-6600X — Veteran Shooter & Config Customizer",
+    "nav.about": "About",
+    "nav.skills": "Skills",
+    "nav.projects": "Projects",
+    "nav.timeline": "Timeline",
+    "nav.contact": "Contact",
+    "hero.greeting": "Hi there, I'm",
+    "hero.im": "I'm a",
+    "hero.desc": "Veteran shooter player & config customizer. I build optimized setups for open source tools.",
+    "hero.btnGithub": "GitHub Profile",
+    "hero.btnZenfox": "Explore ZenFox",
+    "hero.scroll": "Scroll down",
+    typingPhrases: ["Veteran Shooter Player", "Config Customizer", "Open Source Enthusiast", "Tech Explorer"],
+
+    "about.title": "About Me",
+    "about.p1": "I am primarily a veteran shooter player, not a professional developer. However, I have a strong passion for customizing and building config files for famous open-source projects like Firefox.",
+    "about.p2": "I use my deep gaming experience and technical knowledge (JavaScript, CSS, etc.) to create highly optimized configurations and setups.",
+    "about.p3": "I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, GitHub, and many others.",
+    "about.locLabel": "Location",
+    "about.locValue": "Egypt",
+    "about.focusLabel": "Focus",
+    "about.focusValue": "Gaming & Config Customization",
+    "about.currentLabel": "Current Project",
+    "about.statusLabel": "Status",
+    "about.statusValue": "Open to collaborate",
+
+    "stats.yearsShooter": "Years in Shooters",
+    "stats.configs": "Configs Built",
+    "stats.commits": "Commits",
+    "stats.tools": "Tools Used",
+
+    "skills.title": "Skills",
+    "skills.gaming": "Gaming & Shooters",
+    "skills.aim": "Aim & Reflexes",
+    "skills.gamesense": "Game Sense",
+    "skills.tactics": "Tactics & Strategy",
+    "skills.config": "Config Customization",
+    "skills.js": "JavaScript",
+    "skills.css": "CSS",
+    "skills.firefox": "Firefox Configs",
+    "skills.tools": "Tools & Tech",
+    "skills.osTools": "Open Source Tools",
+    "skills.practices": "Practices",
+    "skills.opensource": "Open Source Knowledge",
+    "skills.learning": "Continuous Learning",
+    "skills.problem": "Problem Solving",
+
+    "projects.title": "Projects",
+    "projects.featured": "Featured",
+    "projects.zenfox.desc": "A simple project I built to learn and gain technical experience in free software. Explore the code on GitHub.",
+    "projects.view": "View on GitHub →",
+    "projects.more.title": "More on GitHub",
+    "projects.more.desc": "I'm always exploring new things. Check out my GitHub profile to see all my repositories and ongoing experiments.",
+    "projects.browse": "Browse GitHub →",
+
+    "timeline.title": "Timeline",
+    "timeline.t1.year": "2026",
+    "timeline.t1.title": "Shooter Veteran & Tech Experience",
+    "timeline.t1.desc": "Became a veteran in the shooter scene, learned a lot, built simple projects like ZenFox, and gained technical experience in free software and shooters.",
+    "timeline.t2.year": "2025",
+    "timeline.t2.title": "Exploring Open Source",
+    "timeline.t2.desc": "Started learning about open source, began using open source apps and tools.",
+    "timeline.t3.year": "2024",
+    "timeline.t3.title": "Became a Pro",
+    "timeline.t3.desc": "Mastered shooters and became a professional player.",
+    "timeline.t4.year": "2023",
+    "timeline.t4.title": "Path to Professionalism",
+    "timeline.t4.desc": "The beginning of my path to professionalism in the shooter world.",
+    "timeline.t5.year": "2022",
+    "timeline.t5.title": "Started Playing Shooters",
+    "timeline.t5.desc": "Started playing shooter games and diving into the scene.",
+
+    "contact.title": "Contact",
+    "contact.desc": "Have an idea, a question, or just want to say hi? Reach out to me on GitHub or Telegram.",
+    "contact.email": "Email",
+
+    "footer.text": "© 2026 SHIMORA-6600X. Built with 💜"
+  },
+  ar: {
+    title: "SHIMORA-6600X — لاعب شوتر محترف و مصمم إعدادات",
+    "nav.about": "عني",
+    "nav.skills": "مهاراتي",
+    "nav.projects": "مشاريعي",
+    "nav.timeline": "رحلتي",
+    "nav.contact": "التواصل",
+    "hero.greeting": "يا هلا، أنا",
+    "hero.im": "أنا",
+    "hero.desc": "لاعب شوتر مخضرم ومظبط إعدادات. بعمل سيتابات محسنة لأدوات المصادر المفتوحة.",
+    "hero.btnGithub": "حسابي على GitHub",
+    "hero.btnZenfox": "استكشف ZenFox",
+    "hero.scroll": "انزل تحت",
+    typingPhrases: ["لاعب شوتر مخضرم", "مظبط إعدادات (Config)", "مهتم بالمصادر المفتوحة", "مستكشف تقني"],
+
+    "about.title": "نبذة عني",
+    "about.p1": "أنا في الأساس لاعب شوتر قديم ومخضرم، مش مطور محترف. بس عندي شغف كبير إني أظبط وأعمل ملفات كونفج (Config files) لمشاريع مشهورة مفتوحة المصدر زي فايرفوكس.",
+    "about.p2": "بستخدم خبرتي الكبيرة في الجيمنج ومعرفتي التقنية (زي JavaScript و CSS) إني أعمل إعدادات كونفج ممتازة ومحسنة جداً.",
+    "about.p3": "عندي خبرة واسعة في عالم المصادر المفتوحة والأدوات اللي بتخليه يشتغل، زي Notepad++ و GitHub وغيرهم كتير.",
+    "about.locLabel": "المكان",
+    "about.locValue": "مصر",
+    "about.focusLabel": "مجالي",
+    "about.focusValue": "الجيمنج وتظبيط الإعدادات",
+    "about.currentLabel": "مشروعي الحالي",
+    "about.statusLabel": "حالتي",
+    "about.statusValue": "متاح للتعاون",
+
+    "stats.yearsShooter": "سنين في الشوتر",
+    "stats.configs": "إعدادات عملتها",
+    "stats.commits": "Commit",
+    "stats.tools": "أدوات بستخدمها",
+
+    "skills.title": "المهارات",
+    "skills.gaming": "الجيمنج والشوتر",
+    "skills.aim": "التصويب وردود الفعل",
+    "skills.gamesense": "الحس الميداني (Game Sense)",
+    "skills.tactics": "التكتيكات والاستراتيجية",
+    "skills.config": "تظبيط الإعدادات (Config)",
+    "skills.js": "JavaScript",
+    "skills.css": "CSS",
+    "skills.firefox": "إعدادات فايرفوكس",
+    "skills.tools": "الأدوات والتقنية",
+    "skills.osTools": "أدوات مفتوحة المصدر",
+    "skills.practices": "خبراتي",
+    "skills.opensource": "معرفة بالمصادر المفتوحة",
+    "skills.learning": "التعلم المستمر",
+    "skills.problem": "حل المشاكل",
+
+    "projects.title": "مشاريعي",
+    "projects.featured": "مميز",
+    "projects.zenfox.desc": "مشروع بسيط عملته عشان أتعلم وأكتسب خبرة تقنية في البرمجيات الحرة. بص على الكود على GitHub.",
+    "projects.view": "شوفه على GitHub ←",
+    "projects.more.title": "المزيد على GitHub",
+    "projects.more.desc": "بستكشف حاجات جديدة على طول. بص على حسابي على GitHub عشان تشوف كل المستودعات والتجارب اللي بعملها.",
+    "projects.browse": "اتفرج على GitHub ←",
+
+    "timeline.title": "رحلتي",
+    "timeline.t1.year": "2026",
+    "timeline.t1.title": "بقيت مخضرم في الشوتر وخبرة تقنية",
+    "timeline.t1.desc": "بقيت مخضرم في عالم الشوتر، وتعلمت كتير، وعملت مشاريع بسيطة زي ZenFox، واكتسبت خبرة تقنية في البرمجيات الحرة والشوتر.",
+    "timeline.t2.year": "2025",
+    "timeline.t2.title": "استكشاف عالم المصادر المفتوحة",
+    "timeline.t2.desc": "بدأت أتعلم عن عالم المصادر المفتوحة وبدأت أستخدم تطبيقات وأدوات مفتوحة المصدر.",
+    "timeline.t3.year": "2024",
+    "timeline.t3.title": "احترفت الشوتر",
+    "timeline.t3.desc": "احترفت الشوتر وبقيت محترف.",
+    "timeline.t4.year": "2023",
+    "timeline.t4.title": "بداية طريق الاحتراف",
+    "timeline.t4.desc": "كانت دي بداية طريقي للاحتراف في عالم الشوتر.",
+    "timeline.t5.year": "2022",
+    "timeline.t5.title": "بدأت ألعب شوتر",
+    "timeline.t5.desc": "بدأت ألعب شوتر وبدأت أغوص في العالم ده.",
+
+    "contact.title": "التواصل",
+    "contact.desc": "عندك فكرة أو سؤال أو حتى عاوز تكلمني على GitHub أو Telegram.",
+    "contact.email": "الإيميل",
+
+    "footer.text": "© 2026 SHIMORA-6600X. اتعمل بـ 💜"
+  }
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentLang  = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+let currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+
+/* ============================================================
+   ELEMENTS
+   ============================================================ */
+const langToggle  = document.getElementById('langToggle');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon   = document.getElementById('themeIcon');
+const scrollProgress = document.getElementById('scrollProgress');
+const typingEl    = document.getElementById('typingText');
+
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+function applyLanguage(lang) {
+  currentLang = lang;
+  const dict = translations[lang];
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+
+  document.title = dict.title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute('content',
+      lang === 'ar' ? 'الموقع الشخصي لـ SHIMORA-6600X — لاعب شوتر مخضرم ومظبط إعدادات.'
+                    : 'Personal portfolio of SHIMORA-6600X — Veteran Shooter & Config Customizer.');
+  }
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+
+  langToggle.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.lang === lang);
+  });
+
+  startTyping();
+
+  try { localStorage.setItem('lang', lang); } catch (e) {}
+}
+
+langToggle.addEventListener('click', () => {
+  applyLanguage(currentLang === 'en' ? 'ar' : 'en');
+});
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  try { localStorage.setItem('theme', theme); } catch (e) {}
+}
+
+themeToggle.addEventListener('click', () => {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+});
+
+/* ============================================================
+   TYPING EFFECT
+   ============================================================ */
+let typingTimer = null;
+let phraseIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+
+function typeLoop() {
+  const phrases = translations[currentLang].typingPhrases;
+  const current = phrases[phraseIndex % phrases.length];
+
+  if (isDeleting) {
+    charIndex--;
+    typingEl.textContent = current.substring(0, charIndex);
+    if (charIndex <= 0) {
+      isDeleting = false;
+      phraseIndex++;
+      typingTimer = setTimeout(typeLoop, 400);
+      return;
+    }
+    typingTimer = setTimeout(typeLoop, 40);
+  } else {
+    charIndex++;
+    typingEl.textContent = current.substring(0, charIndex);
+    if (charIndex >= current.length) {
+      isDeleting = true;
+      typingTimer = setTimeout(typeLoop, 1800);
+      return;
+    }
+    typingTimer = setTimeout(typeLoop, 80);
+  }
+}
+
+function startTyping() {
+  clearTimeout(typingTimer);
+  phraseIndex = 0;
+  charIndex = 0;
+  isDeleting = false;
+  typingEl.textContent = '';
+  typingTimer = setTimeout(typeLoop, 300);
+}
+
+/* ============================================================
+   SCROLL PROGRESS
+   ============================================================ */
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (scrolled / total) * 100 : 0;
+  scrollProgress.style.width = pct + '%';
+}, { passive: true });
+
+/* ============================================================
+   REVEAL ON SCROLL
+   ============================================================ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ============================================================
+   COUNTER ANIMATION
+   ============================================================ */
+function animateCounter(el, target) {
+  const duration = 1500;
+  const startTime = performance.now();
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toString();
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = target.toString();
+  }
+  requestAnimationFrame(step);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseInt(el.dataset.target, 10) || 0;
+      animateCounter(el, target);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+/* ============================================================
+   SKILL BARS
+   ============================================================ */
+const skillObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const fill = entry.target;
+      const level = fill.dataset.level || '0';
+      fill.style.width = level + '%';
+      skillObserver.unobserve(fill);
+    }
+  });
+}, { threshold: 0.4 });
+
+document.querySelectorAll('.skill-fill').forEach(el => skillObserver.observe(el));
+
+/* ============================================================
+   BACKGROUND PARTICLE ANIMATION (Canvas) - No Mouse Interaction
+   ============================================================ */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let particles = [];
+
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  initParticles();
+}
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.size = Math.random() * 2 + 1;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.x < 0 || this.x > width) this.vx *= -1;
+    if (this.y < 0 || this.y > height) this.vy *= -1;
+
+    this.draw();
+  }
+  draw() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    ctx.fillStyle = isLight ? 'rgba(136, 57, 239, 0.5)' : 'rgba(203, 166, 247, 0.5)'; // Mauve
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function initParticles() {
+  particles = [];
+  let numberOfParticles = (width * height) / 12000;
+  for (let i = 0; i < numberOfParticles; i++) {
+    particles.push(new Particle());
+  }
+}
+
+function connect() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  for (let a = 0; a < particles.length; a++) {
+    for (let b = a; b < particles.length; b++) {
+      let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                   + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+      if (distance < (width / 10) * (height / 10)) {
+        let opacityValue = 1 - (distance / 20000);
+        ctx.strokeStyle = isLight ? `rgba(30, 102, 245, ${opacityValue * 0.2})` : `rgba(137, 180, 250, ${opacityValue * 0.3})`; // Blue
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(particles[a].x, particles[a].y);
+        ctx.lineTo(particles[b].x, particles[b].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  ctx.clearRect(0, 0, width, height);
+  for (let i = 0; i < particles.length; i++) {
+    particles[i].update();
+  }
+  connect();
+}
+
+// Initialize canvas
+resize();
+animate();
+
+/* ============================================================
+   INIT
+   ============================================================ */
+applyLanguage(currentLang);
+applyTheme(currentTheme);
+</script>
+
+</body>
+</html>
