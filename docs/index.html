@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SHIMORA-6600X — Veteran Shooter & Config Customizer</title>
+<title>SHIMORA</title>
 <meta name="description" content="Personal portfolio of SHIMORA-6600X — Veteran Shooter & Config Customizer.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+
+<!-- Performance: preconnect to avatar host -->
+<link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin>
 
 <!-- Early theme & language restore (no FOUC) -->
 <script>
@@ -218,7 +221,12 @@ body {
   gap: 10px;
   align-items: center;
 }
+
+/* ============================================================
+   TOGGLE BUTTONS (Language & Theme) — animated
+   ============================================================ */
 .lang-btn, .theme-btn {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--surface-0);
   color: var(--text);
@@ -228,20 +236,86 @@ body {
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.25s ease,
+              box-shadow 0.3s ease,
+              background 0.25s ease,
+              color 0.25s ease;
 }
 .lang-btn:hover, .theme-btn:hover {
   border-color: var(--mauve);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(203, 166, 247, 0.2);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(203, 166, 247, 0.3);
 }
-.lang-opt { opacity: 0.5; transition: opacity 0.25s, color 0.25s; }
-.lang-opt.active { opacity: 1; color: var(--mauve); }
+.lang-btn:active, .theme-btn:active {
+  transform: translateY(0) scale(0.94);
+  transition-duration: 0.1s;
+}
+
+/* Idle ring pulse on toggle buttons */
+.lang-btn::after, .theme-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.lang-btn::after   { animation: ringMauve  3.5s ease-out infinite; }
+.theme-btn::after  { animation: ringBlue   3.5s ease-out 0.8s infinite; }
+@keyframes ringMauve {
+  0%   { box-shadow: 0 0 0 0 rgba(203, 166, 247, 0.35); }
+  65%  { box-shadow: 0 0 0 10px rgba(203, 166, 247, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(203, 166, 247, 0); }
+}
+@keyframes ringBlue {
+  0%   { box-shadow: 0 0 0 0 rgba(137, 180, 250, 0.35); }
+  65%  { box-shadow: 0 0 0 10px rgba(137, 180, 250, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(137, 180, 250, 0); }
+}
+
+.lang-opt {
+  opacity: 0.5;
+  display: inline-block;
+  transition: opacity 0.3s ease, color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.lang-opt.active {
+  opacity: 1;
+  color: var(--mauve);
+  transform: scale(1.12);
+}
 .lang-sep { color: var(--overlay); font-weight: 400; }
 .theme-btn { font-size: 1.05rem; padding: 6px 12px; }
+
+/* Click animation triggers */
+.lang-btn.swap .lang-opt.active {
+  animation: langBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes langBounce {
+  0%   { transform: scale(1) rotate(0deg); }
+  45%  { transform: scale(1.5) rotate(-8deg); }
+  100% { transform: scale(1.12) rotate(0deg); }
+}
+
+.theme-btn:hover #themeIcon {
+  display: inline-block;
+  animation: iconSwing 0.6s ease;
+}
+@keyframes iconSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-18deg); }
+  75%      { transform: rotate(18deg); }
+}
+.theme-btn.spin #themeIcon {
+  display: inline-block;
+  animation: themeSpin 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes themeSpin {
+  from { transform: rotate(0deg) scale(0.6); }
+  to   { transform: rotate(360deg) scale(1); }
+}
 
 /* ============================================================
    CONTAINER
@@ -318,7 +392,7 @@ body {
   font-size: 1.15rem;
   color: var(--subtext-1);
   min-height: 2em;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   animation: fadeUp 0.8s ease 0.4s both;
 }
 .typing-prefix { color: var(--subtext-0); margin-inline-end: 6px; }
@@ -336,12 +410,89 @@ body {
   50%      { opacity: 0; }
 }
 
+/* ============================================================
+   SOCIAL LINKS (Hero)
+   ============================================================ */
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 26px;
+  flex-wrap: wrap;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-0);
+  color: var(--subtext-1);
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.35s ease,
+              background 0.3s ease;
+  animation: socialPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.social-link:nth-child(1) { animation-delay: 0.55s; }
+.social-link:nth-child(2) { animation-delay: 0.63s; }
+.social-link:nth-child(3) { animation-delay: 0.71s; }
+.social-link:nth-child(4) { animation-delay: 0.79s; }
+
+@keyframes socialPop {
+  from { opacity: 0; transform: scale(0.3) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.social-link svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.social-link:hover {
+  transform: translateY(-4px) scale(1.1);
+}
+.social-link:hover svg {
+  transform: scale(1.15) rotate(-8deg);
+}
+.social-link:active {
+  transform: translateY(-1px) scale(0.95);
+  transition-duration: 0.1s;
+}
+
+/* Brand-colored hover glows */
+.social-link.github:hover {
+  color: var(--text);
+  border-color: var(--text);
+  box-shadow: 0 8px 24px rgba(203, 166, 247, 0.35);
+}
+.social-link.bluesky:hover {
+  color: #0A7AFF;
+  border-color: #0A7AFF;
+  box-shadow: 0 8px 24px rgba(10, 122, 255, 0.4);
+}
+.social-link.mastodon:hover {
+  color: #6364FF;
+  border-color: #6364FF;
+  box-shadow: 0 8px 24px rgba(99, 100, 255, 0.4);
+}
+.social-link.telegram:hover {
+  color: #26A5E4;
+  border-color: #26A5E4;
+  box-shadow: 0 8px 24px rgba(38, 165, 228, 0.4);
+}
+
 .hero-desc {
   max-width: 620px;
   margin: 0 auto 32px;
   color: var(--subtext-0);
   font-size: 1.02rem;
-  animation: fadeUp 0.8s ease 0.5s both;
+  animation: fadeUp 0.8s ease 0.95s both;
 }
 
 .hero-buttons {
@@ -350,9 +501,12 @@ body {
   gap: 14px;
   flex-wrap: wrap;
   margin-bottom: 48px;
-  animation: fadeUp 0.8s ease 0.6s both;
+  animation: fadeUp 0.8s ease 1.05s both;
 }
 
+/* ============================================================
+   PRIMARY BUTTONS (animated shine)
+   ============================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -364,16 +518,46 @@ body {
   font-size: 0.95rem;
   color: var(--bg);
   background: linear-gradient(135deg, var(--mauve), var(--lavender));
-  transition: all 0.3s ease;
   border: none;
   cursor: pointer;
   font-family: inherit;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease,
+              background 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease;
 }
+
+/* Shine effect */
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+[data-theme="light"] .btn::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+}
+.btn:hover::before { transform: translateX(100%); }
+
 .btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.03);
   box-shadow: 0 10px 28px rgba(203, 166, 247, 0.4);
   background: linear-gradient(135deg, var(--lavender), var(--blue));
 }
+.btn:active {
+  transform: translateY(-1px) scale(0.97);
+  transition-duration: 0.1s;
+}
+
 .btn.secondary {
   background: transparent;
   color: var(--text);
@@ -383,7 +567,7 @@ body {
   border-color: var(--blue);
   box-shadow: 0 6px 20px rgba(137, 180, 250, 0.25);
   background: transparent;
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.03);
 }
 
 .scroll-hint {
@@ -394,7 +578,7 @@ body {
   color: var(--overlay);
   font-size: 0.85rem;
   text-decoration: none;
-  animation: fadeUp 0.8s ease 0.8s both;
+  animation: fadeUp 0.8s ease 1.2s both;
 }
 .scroll-arrow {
   font-size: 1.2rem;
@@ -614,7 +798,12 @@ section h2 {
 .project-icon {
   font-size: 2rem;
   line-height: 1;
+  display: inline-block;
   filter: drop-shadow(0 0 12px rgba(203, 166, 247, 0.4));
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.project-card:hover .project-icon {
+  transform: scale(1.2) rotate(-10deg);
 }
 .project-card h3 {
   color: var(--text);
@@ -688,9 +877,9 @@ section h2 {
   background: var(--bg);
   border: 2px solid var(--mauve);
   box-shadow: 0 0 15px var(--mauve);
-  transition: transform 0.3s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.timeline-item:hover .timeline-dot { transform: scale(1.3); }
+.timeline-item:hover .timeline-dot { transform: scale(1.4); }
 .timeline-content {
   background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
   border: 1px solid var(--surface-0);
@@ -758,17 +947,25 @@ section h2 {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
 }
 .contact-link:hover {
   border-color: var(--mauve);
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.04);
   box-shadow: 0 8px 22px rgba(203, 166, 247, 0.25);
 }
 .contact-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.contact-icon svg {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.contact-link:hover .contact-icon svg {
+  transform: scale(1.2) rotate(-10deg);
 }
 
 /* ============================================================
@@ -820,6 +1017,8 @@ footer {
   .typing-wrap { font-size: 1rem; }
   .contact-box { padding: 26px 20px; }
   .glow { opacity: calc(var(--glow-opacity) * 0.7); }
+  .social-link { width: 42px; height: 42px; }
+  .social-link svg { width: 18px; height: 18px; }
 }
 
 /* Reduce motion for accessibility */
@@ -869,20 +1068,45 @@ footer {
 <header id="top" class="hero">
   <div class="container hero-inner">
     <!-- الصورة الشخصية -->
-    <img src="https://avatars.githubusercontent.com/u/238486445?v=4" alt="SHIMORA-6600X" class="avatar-img">
-    
+    <img src="https://avatars.githubusercontent.com/u/238486445?v=4" alt="SHIMORA-6600X" class="avatar-img" decoding="async" width="130" height="130">
+
     <p class="greeting" data-i18n="hero.greeting">Hi there, I'm</p>
     <h1 class="hero-name">SHIMORA-6600X</h1>
     <div class="typing-wrap">
       <span class="typing-prefix" data-i18n="hero.im">I'm a</span>
       <span class="typing-text" id="typingText"></span><span class="typing-cursor">|</span>
     </div>
+
+    <!-- ============ SOCIAL MEDIA ============ -->
+    <div class="social-links">
+      <a href="https://github.com/SHIMORA-6600X" target="_blank" rel="noopener" class="social-link github" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+      </a>
+      <a href="https://bsky.app/profile/shimorax11.bsky.social" target="_blank" rel="noopener" class="social-link bluesky" aria-label="Bluesky">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"/>
+        </svg>
+      </a>
+      <a href="https://mastodon.social/@SHIMORA_6600X" target="_blank" rel="noopener" class="social-link mastodon" aria-label="Mastodon">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M23.268 5.313c-.35-2.578-2.617-4.61-5.304-5.004C17.51.242 15.792 0 11.813 0h-.03c-3.98 0-4.835.242-5.288.309C3.882.692 1.496 2.518.917 5.127.64 6.412.61 7.837.661 9.143c.074 1.874.088 3.745.26 5.611.118 1.24.325 2.47.62 3.68.55 2.237 2.777 4.098 4.96 4.857 2.336.792 4.849.923 7.256.38.265-.061.527-.132.786-.213.585-.184 1.27-.39 1.774-.753a.057.057 0 0 0 .023-.043v-1.809a.052.052 0 0 0-.02-.041.053.053 0 0 0-.046-.01 20.282 20.282 0 0 1-4.709.545c-2.73 0-3.463-1.284-3.674-1.818a5.593 5.593 0 0 1-.319-1.433.053.053 0 0 1 .066-.054c1.517.363 3.072.546 4.632.546.376 0 .75 0 1.125-.01 1.57-.044 3.224-.124 4.768-.422.038-.008.077-.015.11-.024 2.435-.464 4.753-1.92 4.989-5.604.008-.145.03-1.52.03-1.67.002-.512.167-3.63-.024-5.545zm-3.748 9.195h-2.561V8.29c0-1.309-.55-1.976-1.67-1.976-1.23 0-1.846.79-1.846 2.35v3.403h-2.546V8.663c0-1.56-.617-2.35-1.848-2.35-1.112 0-1.668.668-1.67 1.977v6.218H4.822V8.102c0-1.31.337-2.35 1.011-3.12.696-.77 1.608-1.164 2.74-1.164 1.311 0 2.302.5 2.962 1.498l.638 1.06.638-1.06c.66-.999 1.65-1.498 2.96-1.498 1.13 0 2.043.395 2.74 1.164.675.77 1.012 1.81 1.012 3.12z"/>
+        </svg>
+      </a>
+      <a href="https://t.me/+e5A5bjJmX-43MmRk" target="_blank" rel="noopener" class="social-link telegram" aria-label="Telegram">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+      </a>
+    </div>
+
     <p class="hero-desc" data-i18n="hero.desc">
       Veteran shooter player & config customizer. I build optimized setups for open source tools.
     </p>
     <div class="hero-buttons">
       <a href="https://github.com/SHIMORA-6600X" target="_blank" rel="noopener" class="btn" data-i18n="hero.btnGithub">GitHub Profile</a>
-      <a href="https://github.com/SHIMORA-6600X/ZenFox" target="_blank" rel="noopener" class="btn secondary" data-i18n="hero.btnZenfox">Explore ZenFox</a>
+      <a href="https://shimora-6600x.github.io/ZenFox/" target="_blank" rel="noopener" class="btn secondary" data-i18n="hero.btnZenfox">Explore ZenFox</a>
     </div>
     <a href="#about" class="scroll-hint">
       <span data-i18n="hero.scroll">Scroll down</span>
@@ -905,7 +1129,7 @@ footer {
         I use my deep gaming experience and technical knowledge (JavaScript, CSS, etc.) to create highly optimized configurations and setups.
       </p>
       <p class="reveal" data-i18n="about.p3">
-        I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, GitHub, and many others.
+        I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, VSCodium, GitHub, and many others.
       </p>
     </div>
     <div class="about-facts reveal">
@@ -945,7 +1169,7 @@ footer {
       <div class="stat-label" data-i18n="stats.commits">Commits</div>
     </div>
     <div class="stat reveal">
-      <div class="stat-num"><span class="counter" data-target="15">0</span>+</div>
+      <div class="stat-num"><span class="counter" data-target="5">0</span>+</div>
       <div class="stat-label" data-i18n="stats.tools">Tools Used</div>
     </div>
   </div>
@@ -1044,7 +1268,7 @@ footer {
         <span>GitHub</span>
         <span>Configs</span>
       </div>
-      <a href="https://github.com/SHIMORA-6600X/ZenFox" target="_blank" rel="noopener" class="btn" data-i18n="projects.view">View on GitHub →</a>
+      <a href="https://shimora-6600x.github.io/ZenFox/" target="_blank" rel="noopener" class="btn" data-i18n="projects.view">View on GitHub →</a>
     </div>
 
     <div class="project-card reveal">
@@ -1163,11 +1387,11 @@ footer {
 
 <script>
 /* ============================================================
-   TRANSLATIONS (Egyptian Arabic Added)
+   TRANSLATIONS
    ============================================================ */
 const translations = {
   en: {
-    title: "SHIMORA-6600X — Veteran Shooter & Config Customizer",
+    title: "SHIMORA",
     "nav.about": "About",
     "nav.skills": "Skills",
     "nav.projects": "Projects",
@@ -1184,7 +1408,7 @@ const translations = {
     "about.title": "About Me",
     "about.p1": "I am primarily a veteran shooter player, not a professional developer. However, I have a strong passion for customizing and building config files for famous open-source projects like Firefox.",
     "about.p2": "I use my deep gaming experience and technical knowledge (JavaScript, CSS, etc.) to create highly optimized configurations and setups.",
-    "about.p3": "I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, GitHub, and many others.",
+    "about.p3": "I have extensive experience with open-source ecosystems and the tools that make them work, like Notepad++, VSCodium, GitHub, and many others.",
     "about.locLabel": "Location",
     "about.locValue": "Egypt",
     "about.focusLabel": "Focus",
@@ -1246,7 +1470,7 @@ const translations = {
     "footer.text": "© 2026 SHIMORA-6600X. Built with 💜"
   },
   ar: {
-    title: "SHIMORA-6600X — لاعب شوتر محترف و مصمم إعدادات",
+    title: "شيمورا",
     "nav.about": "عني",
     "nav.skills": "مهاراتي",
     "nav.projects": "مشاريعي",
@@ -1258,12 +1482,12 @@ const translations = {
     "hero.btnGithub": "حسابي على GitHub",
     "hero.btnZenfox": "استكشف ZenFox",
     "hero.scroll": "انزل تحت",
-    typingPhrases: ["لاعب شوتر مخضرم", "مظبط إعدادات (Config)", "مهتم بالمصادر المفتوحة", "مستكشف تقني"],
+    typingPhrases: ["لاعب شوتر مخضرم", "مصمم إعدادات (Config)", "مهتم بالمصادر المفتوحة", "مستكشف تقني"],
 
     "about.title": "نبذة عني",
     "about.p1": "أنا في الأساس لاعب شوتر قديم ومخضرم، مش مطور محترف. بس عندي شغف كبير إني أظبط وأعمل ملفات كونفج (Config files) لمشاريع مشهورة مفتوحة المصدر زي فايرفوكس.",
     "about.p2": "بستخدم خبرتي الكبيرة في الجيمنج ومعرفتي التقنية (زي JavaScript و CSS) إني أعمل إعدادات كونفج ممتازة ومحسنة جداً.",
-    "about.p3": "عندي خبرة واسعة في عالم المصادر المفتوحة والأدوات اللي بتخليه يشتغل، زي Notepad++ و GitHub وغيرهم كتير.",
+    "about.p3": "عندي خبرة واسعة في عالم المصادر المفتوحة والأدوات اللي بتخليه يشتغل، زي Notepad++ و VSCodium و GitHub وغيرهم كتير.",
     "about.locLabel": "المكان",
     "about.locValue": "مصر",
     "about.focusLabel": "مجالي",
@@ -1331,6 +1555,7 @@ const translations = {
    ============================================================ */
 let currentLang  = document.documentElement.lang === 'ar' ? 'ar' : 'en';
 let currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ============================================================
    ELEMENTS
@@ -1375,6 +1600,10 @@ function applyLanguage(lang) {
 
 langToggle.addEventListener('click', () => {
   applyLanguage(currentLang === 'en' ? 'ar' : 'en');
+  // Trigger bounce animation on the newly-active option
+  langToggle.classList.remove('swap');
+  void langToggle.offsetWidth;
+  langToggle.classList.add('swap');
 });
 
 /* ============================================================
@@ -1389,6 +1618,10 @@ function applyTheme(theme) {
 
 themeToggle.addEventListener('click', () => {
   applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  // Trigger spin animation on the icon
+  themeToggle.classList.remove('spin');
+  void themeToggle.offsetWidth;
+  themeToggle.classList.add('spin');
 });
 
 /* ============================================================
@@ -1504,17 +1737,22 @@ const skillObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.skill-fill').forEach(el => skillObserver.observe(el));
 
 /* ============================================================
-   BACKGROUND PARTICLE ANIMATION (Canvas) - No Mouse Interaction
+   BACKGROUND PARTICLE ANIMATION (Canvas)
+   Lightweight: capped particles, pauses when tab hidden,
+   skips animation when prefers-reduced-motion
    ============================================================ */
 const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: true });
 let width, height;
 let particles = [];
+let rafId = null;
+let isPaused = false;
 
 function resize() {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
   initParticles();
+  if (prefersReducedMotion) drawStatic();
 }
 window.addEventListener('resize', resize);
 
@@ -1529,15 +1767,13 @@ class Particle {
   update() {
     this.x += this.vx;
     this.y += this.vy;
-
     if (this.x < 0 || this.x > width) this.vx *= -1;
     if (this.y < 0 || this.y > height) this.vy *= -1;
-
     this.draw();
   }
   draw() {
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-    ctx.fillStyle = isLight ? 'rgba(136, 57, 239, 0.5)' : 'rgba(203, 166, 247, 0.5)'; // Mauve
+    ctx.fillStyle = isLight ? 'rgba(136, 57, 239, 0.5)' : 'rgba(203, 166, 247, 0.5)';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.closePath();
@@ -1547,21 +1783,27 @@ class Particle {
 
 function initParticles() {
   particles = [];
-  let numberOfParticles = (width * height) / 12000;
-  for (let i = 0; i < numberOfParticles; i++) {
+  // Performance: cap particle count. Fewer on small screens.
+  const area = width * height;
+  let count = Math.min(80, Math.floor(area / 18000));
+  if (width < 600) count = Math.min(35, count);
+  for (let i = 0; i < count; i++) {
     particles.push(new Particle());
   }
 }
 
 function connect() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const threshold = (width / 10) * (height / 10);
+  const strokeBase = isLight ? 'rgba(30, 102, 245,' : 'rgba(137, 180, 250,';
   for (let a = 0; a < particles.length; a++) {
-    for (let b = a; b < particles.length; b++) {
-      let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
-                   + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
-      if (distance < (width / 10) * (height / 10)) {
-        let opacityValue = 1 - (distance / 20000);
-        ctx.strokeStyle = isLight ? `rgba(30, 102, 245, ${opacityValue * 0.2})` : `rgba(137, 180, 250, ${opacityValue * 0.3})`; // Blue
+    for (let b = a + 1; b < particles.length; b++) {
+      const dx = particles[a].x - particles[b].x;
+      const dy = particles[a].y - particles[b].y;
+      const distance = dx * dx + dy * dy;
+      if (distance < threshold) {
+        const opacityValue = 1 - (distance / 20000);
+        ctx.strokeStyle = strokeBase + (opacityValue * (isLight ? 0.2 : 0.3)) + ')';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(particles[a].x, particles[a].y);
@@ -1572,18 +1814,36 @@ function connect() {
   }
 }
 
-function animate() {
-  requestAnimationFrame(animate);
+function drawStatic() {
   ctx.clearRect(0, 0, width, height);
-  for (let i = 0; i < particles.length; i++) {
-    particles[i].update();
-  }
+  for (let i = 0; i < particles.length; i++) particles[i].draw();
   connect();
 }
 
-// Initialize canvas
+function animate() {
+  if (isPaused) return;
+  rafId = requestAnimationFrame(animate);
+  ctx.clearRect(0, 0, width, height);
+  for (let i = 0; i < particles.length; i++) particles[i].update();
+  connect();
+}
+
+// Pause when tab is hidden — saves CPU/battery on mobile
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    isPaused = true;
+    if (rafId) cancelAnimationFrame(rafId);
+  } else if (!prefersReducedMotion) {
+    isPaused = false;
+    animate();
+  }
+});
+
+// Init canvas
 resize();
-animate();
+if (!prefersReducedMotion) {
+  animate();
+}
 
 /* ============================================================
    INIT
